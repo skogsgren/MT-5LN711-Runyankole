@@ -1,0 +1,6 @@
+These scripts are external and not written by us.
+
+Attributions:
+
+learn_bpe.py: OpenNMT/tools
+apply_bpe.py: OpenNMT/tools

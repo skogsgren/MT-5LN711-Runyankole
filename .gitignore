@@ -1,4 +1,11 @@
 __pycache__
 *.swp
+*/run
+*/models
+
+*.log
+*.pt
+*.vocab
 
 src/data
+src/data.tar
