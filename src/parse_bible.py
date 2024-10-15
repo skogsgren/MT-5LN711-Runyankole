@@ -72,8 +72,6 @@ if __name__ == "__main__":
             tuple(x.split("\t")) for x in f.readlines() if x[0] != "#"
         ]
 
-    parsed_source: list[str]
-    parsed_target: list[str]
     parallel_text: list[tuple[str, str]] = parse_bible(
         source_lines, target_lines, args.lowercase
     )
