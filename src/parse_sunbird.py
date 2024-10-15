@@ -1,4 +1,5 @@
-__doc__ = """ this file handles the parsing of sunbird (SALT) data file and exports it to MOSES format (i.e. one sequence per row)"""
+__doc__ = """ this file handles the parsing of sunbird (SALT) data file and
+exports it to MOSES format (i.e. one sequence per row)"""
 __author__ = "Gustaf Gren"
 
 import argparse

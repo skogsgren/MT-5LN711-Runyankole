@@ -1,4 +1,8 @@
-__doc__ = """ given two bibles formatted with the columns  `verse_number` and `verse_text`, exports that to MOSES formatted dataset (i.e. one row per sequence). One bible is called target and one is called source, where source is assumed to be a subset of target (i.e. from a source language which is lower resource to a target language which is higher resource)."""
+__doc__ = """ given two bibles formatted with the columns  `verse_number` and
+`verse_text`, exports that to MOSES formatted dataset (i.e. one row per
+sequence). One bible is called target and one is called source, where source is
+assumed to be a subset of target (i.e. from a source language which is lower
+resource to a target language which is higher resource)."""
 __author__ = "Gustaf Gren"
 
 import argparse
@@ -27,7 +31,9 @@ def parse_bible(
 
 if __name__ == "__main__":
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        description="given two bibles formatted with the columns `verse_number` and `verse_text` exports that to MOSES formatted dataset."
+        description="""given two bibles formatted with the columns
+        `verse_number` and `verse_text` exports that to MOSES formatted
+        dataset."""
     )
     parser.add_argument(
         "--source",
