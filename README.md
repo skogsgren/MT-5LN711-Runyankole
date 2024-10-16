@@ -2,6 +2,12 @@
 
 Project for MT-5LN711 at Uppsala University.
 
+## Prerequisites
+
+```{bash}
+pip3 install -r requirements.txt
+```
+
 ## Preprocessing
 
 The script in `src/preprocessing_pipeline.sh` does the following:
