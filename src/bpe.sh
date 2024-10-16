@@ -38,7 +38,7 @@ echo concatenated file is "$(wc -l "$TMP_IN")" sequences long
 
 BPE="$OUTPUT""$LANG".bpe
 echo learning BPE pairs from "$TMP_IN", saving to "$BPE"
-external_scripts/learn_bpe.py \
+python3 external_scripts/learn_bpe.py \
     --input "$TMP_IN" \
     --output "$BPE"
 
@@ -52,7 +52,7 @@ do
     OUT="$OUT"_bpe.txt
 
     echo encoding "$i" using learnt BPE pairs to "$OUTPUT""$OUT"
-    external_scripts/apply_bpe.py \
+    python3 external_scripts/apply_bpe.py \
         --input "$i" \
         --codes "$BPE" \
         --output "$OUTPUT""$OUT"
