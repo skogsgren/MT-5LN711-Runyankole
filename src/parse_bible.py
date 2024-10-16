@@ -22,6 +22,7 @@ def parse_bible(
     for verse_number, verse_text in source_lines:
         if not target_dict.get(verse_number):
             print(f"WARN: {verse_number} not in target")
+            continue
         if lowercase:
             verse_text = verse_text.lower()
             target_dict[verse_number] = target_dict[verse_number].lower()
