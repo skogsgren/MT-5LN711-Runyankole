@@ -14,7 +14,7 @@ mkdir -p "$TMP_DIR"/data
 echo extracting ./data.tar to "$TMP_DIR"/data
 tar xvf ./data.tar --directory "$TMP_DIR"/data
 
-MTHS=(test dev training)
+MTHS=("test" "dev" "training")
 echo parsing sunbird dataset
 for MTH in "${MTHS[@]}"
 do
