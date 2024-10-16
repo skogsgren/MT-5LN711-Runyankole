@@ -21,7 +21,6 @@ do
     python3 ./parse_sunbird.py \
         --input "$TMP_DIR"/data/sunbird_"$MTH"_dataset.txt \
         --output "$TMP_DIR"/"$MTH".txt \
-        --lowercase \
         --split_punctuation
 done
 
@@ -30,7 +29,6 @@ python3 parse_bible.py \
     --source "$TMP_DIR"/data/nyn-x-bible.txt \
     --target "$TMP_DIR"/data/eng-x-bible-kingjames.txt \
     --output_dir "$TMP_DIR" \
-    --lowercase
 
 mkdir -p ./data
 
