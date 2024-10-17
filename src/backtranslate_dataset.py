@@ -9,6 +9,7 @@ from tqdm import tqdm
 from pathlib import Path
 import argparse
 from deep_translator import GoogleTranslator
+from deep_translator.exceptions import TranslationNotFound
 from dataclasses import dataclass
 import json
 
@@ -52,7 +53,16 @@ def translate(
         filtered_batches[str(i)] = batch
 
     for i, batch in tqdm(filtered_batches.items()):
-        translated_batch: list[str] = translator.translate_batch(batch.texts)
+        try:
+            translated_batch: list[str] = translator.translate_batch(batch.texts)
+        # rudimentary recursion (w/o checks!) to keep going if translation fails
+        except TranslationNotFound:
+            return translate(
+                lines=lines,
+                src_lang=src_lang,
+                tgt_lang=tgt_lang,
+                progress_path=progress_path,
+            )
         # save progress for each batch to increase stability
         with open(progress_path, "r") as f:
             progress = json.load(f)
@@ -62,7 +72,6 @@ def translate(
 
     translated_lines: list[str] = []
     for _, batch in progress.items():
-        translated_lines += lines
         translated_lines += batch
     return translated_lines
 
