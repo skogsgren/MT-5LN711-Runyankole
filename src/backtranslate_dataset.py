@@ -63,6 +63,7 @@ def translate(
     translated_lines: list[str] = []
     for _, batch in progress.items():
         translated_lines += lines
+        translated_lines += batch
     return translated_lines
 
 
