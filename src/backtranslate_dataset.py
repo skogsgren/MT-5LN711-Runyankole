@@ -35,19 +35,23 @@ def translate(
 
     # generate batches even if progress is provided since it's quick anyways
     lines.reverse()
-    batches: list[Batch] = []
+    batches: dict[int, Batch] = {}
     current_batch: Batch = Batch(0, [])
+    n: int = 0
     while lines:
         line: str = lines.pop()
         if (current_batch.char_count + len(line)) > 5000:
-            batches.append(current_batch)
+            batches[n] = current_batch
+            n += 1
             current_batch = Batch(0, [])
         current_batch.char_count += len(line)
         current_batch.texts.append(line)
+    # have to add the last batch since it is smaller than 5000 char length
+    batches[n] = current_batch
 
     # filter out already processed batches for accurate tqdm estimations
     filtered_batches: dict[str, Batch] = {}
-    for i, batch in enumerate(batches):
+    for i, batch in batches.items():
         if progress.get(str(i)):
             continue
         filtered_batches[str(i)] = batch
