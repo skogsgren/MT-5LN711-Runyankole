@@ -32,32 +32,33 @@ python3 src/backtranslate_dataset.py \
 
 ## Preprocessing
 
-The `data.tar.xz` file is unprocessed and contains: 1) the provided
-project data from the Sunbird-dataset, 2) a Nkore-Kiga Bible translation
-and the New King James English Bible, 3) the backtranslated output from
-the provided project data using the `./backtranslate_dataset.py` script.
+The `data.tar.xz` file is unprocessed and contains:
+1. The provided project data from the Sunbird-dataset
+2. A Nkore-Kiga Bible translation, and the New King James English Bible,
+3. The backtranslated output from the provided project data using the
+   `./backtranslate_dataset.py` script.
 
 In order to process it, there is a bash-script
 `./src/preprocessing_pipeline.sh` which does the following:
 
-1. Parses the sunbird dataset and extracts Runyankole-> Eng according to
-   MOSES dataset convention (i.e. one sequence per line).
-2. Parses the bible verses in Runyankole and matches them with the
-   English King James version according to MOSES convention.
-3. Trains and applies BPE to those extracted datasets for each respective
-   $METHOD:
+- Parses the sunbird dataset and extracts Runyankole-> Eng according to
+  MOSES dataset convention (i.e. one sequence per line).
+- Parses the bible verses in Runyankole and matches them with the
+  English King James version according to MOSES convention.
+- Trains and applies BPE to those extracted datasets for each respective
+  `$METHOD`:
     - `original`: data from sunbird.
     - `bible`: data from sunbird + bible translation.
     - `all`: data from sunbird + bible translation + backtranslated data.
-4. Copies the extracted datasets to the `./src/data/$METHOD` folder.
+- Copies the extracted datasets to the `./src/data/$METHOD` folder.
 
 It should be run from with the current working directory as `src`, and
 the `data.tar.xz` file should be there as well. The total time of the
-entire pipeline for every method takes a minute or two.
+entire pipeline for every method should only take a minute or two.
 
-To run the preprocessing pipeline simply run the script with `./src`
-being your current working directory:
+To run the preprocessing pipeline simply run:
 
 ```{bash}
-./src/preprocessing_pipeline.sh
+cd src
+./preprocessing_pipeline.sh
 ```
