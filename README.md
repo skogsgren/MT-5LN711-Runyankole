@@ -20,6 +20,16 @@ since `deep-translator` uses scraping to interact with Google Translate
 unnecessary HTTP calls (and thus also risking getting banned!) this took
 about 6 hours for all the sequences in the training data.
 
+Before doing that on Kiga, however, you need to patch the `deep-translator`
+`constants.py` file to include Kiga in it's predefined list of languages. Use
+the diff provided in the repo. For example, if you're using `venv` then the
+following command will patch it:
+
+```{bash}
+patch $VENV/lib/python3.11/site-packages/deep_translator/constants.py \
+    < ./deep-translator_constants.diff
+```
+
 If you want to run the backtranslation yourself, then run it like so:
 
 ```{bash}

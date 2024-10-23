@@ -1,0 +1,10 @@
+--- constants.py	2024-10-23 10:46:42.285997978 +0200
++++ constants_changed.py	2024-10-23 10:46:10.501997035 +0200
+@@ -88,6 +88,7 @@
+     "kannada": "kn",
+     "kazakh": "kk",
+     "khmer": "km",
++    "kiga": "cgg",
+     "kinyarwanda": "rw",
+     "konkani": "gom",
+     "korean": "ko",
