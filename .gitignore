@@ -7,7 +7,10 @@ __pycache__
 *.pt
 *.vocab
 
+data/
 src/data
 src/data.tar
 src/data-bt.tar
 src/data.tar.xz
+
+**.ipynb_checkpoints**
