@@ -17,6 +17,8 @@
 # DROPOUT
 # ATTENTION_DROPOUT
 
+# DECAY_METHOD
+
 # Training files
 data:
     corpus_1:
@@ -87,18 +89,18 @@ save_checkpoint_steps: 128 # save after valid_steps
 
 # Batching
 num_workers: 12 # Default: 2, tiny datasets dont need much higher
-bucket_size: 65536 # grouping together shorter sents that will be used in batches
+bucket_size: 8192 # grouping together shorter sents that will be used in batches
 batch_type: "tokens" # tokens: often preferred for Transformer models; #sents: useful when sentences are of similar length
 normalization: "tokens"
-batch_size: 16384 # change it when CUDA out of memory
-valid_batch_size: 16384
+batch_size: 8192 # change it when CUDA out of memory
+valid_batch_size: 8192
 accum_count: [1] # Default: 1. Accumulate gradient this many times. Approximately equivalent to updating batch_size * accum_count batches at once. Recommended for Transformer.
 
 # Optimization
 optim: "adam"
 learning_rate: LEARNING_RATE
 warmup_steps: 128 # 1 epoch warm up should be enough
-decay_method: "noam"
+decay_method: DECAY_METHOD
 adam_beta1: 0.9
 adam_beta2: 0.98
 max_grad_norm: 5
