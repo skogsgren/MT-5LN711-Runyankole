@@ -9,6 +9,9 @@ __pycache__
 
 data/
 src/data
+src/test_model/models
+src/test_model/preds
+src/test_model/run
 src/data.tar
 src/data-bt.tar
 src/data.tar.xz

@@ -1,31 +1,31 @@
 # YAML Template for Training Config
 # Programatically substituded variables MUST MATCH (CASE SENSITIVE) THE VARIABLE NAME IN Pipeline._generate_config_file()!
-# original
-# original
-# BLEU
+# DATASET_NAME_TRAIN
+# DATASET_NAME_VALID
+# METRIC
 
-# 2000
+# TRAIN_STEPS
 
-# 2
+# LEARNING_RATE
 
-# 2
-# 2
-# 4
-# 64
-# 64
-# 128
-# [0.2]
-# [0.2]
+# ENC_LAYERS
+# DEC_LAYERS
+# HEADS
+# HIDDEN_SIZE
+# WORD_VEC_SIZE
+# TRANSFORMER_FF
+# DROPOUT
+# ATTENTION_DROPOUT
 
 # Training files
 data:
     corpus_1:
-        path_src: ../data/original/nyn_train.bpe
-        path_tgt: ../data/original/eng_train.bpe
+        path_src: ../data/DATASET_NAME_TRAIN/nyn_train.bpe
+        path_tgt: ../data/DATASET_NAME_TRAIN/eng_train.bpe
         # transforms: [filtertoolong]
     valid:
-        path_src: ../data/original/nyn_dev.bpe
-        path_tgt: ../data/original/eng_dev.bpe
+        path_src: ../data/DATASET_NAME_VALID/nyn_dev.bpe
+        path_tgt: ../data/DATASET_NAME_VALID/eng_dev.bpe
         # transforms: [filtertoolong]
 
 # Number of GPUs, and IDs of GPUs
@@ -61,7 +61,7 @@ log_file: train.log
 save_model: models/model.nyneng
 
 # Validation
-valid_metrics: [BLEU]
+valid_metrics: [METRIC]
 scoring_debug: true
 dump_preds: preds/ # needed for scoring_debug
 verbose: true
@@ -78,7 +78,7 @@ early_stopping: 8
 # Increase to 200000 or more for large datasets
 # For fine-tuning, add up the required steps to the original steps
 # there are around 540K tokens in the all/ dataset, with around 4096 batch_size, around 130 training steps (130 batches) should be enough for 1 epoch
-train_steps: 2000 # 1024 for around 8 epochs
+train_steps: TRAIN_STEPS # 1024 for around 8 epochs
 # Run validation after N steps
 valid_steps: 128 # 128 steps should be 1 epoch
 report_every: 64
@@ -96,7 +96,7 @@ accum_count: [1] # Default: 1. Accumulate gradient this many times. Approximatel
 
 # Optimization
 optim: "adam"
-learning_rate: 2
+learning_rate: LEARNING_RATE
 warmup_steps: 128 # 1 epoch warm up should be enough
 decay_method: "noam"
 adam_beta1: 0.9
@@ -111,15 +111,15 @@ model_dtype: "fp16"
 encoder_type: transformer
 decoder_type: transformer
 position_encoding: true
-enc_layers: 2
-dec_layers: 2
-heads: 4
-hidden_size: 64
-word_vec_size: 64
-transformer_ff: 128
+enc_layers: ENC_LAYERS
+dec_layers: DEC_LAYERS
+heads: HEADS
+hidden_size: HIDDEN_SIZE
+word_vec_size: WORD_VEC_SIZE
+transformer_ff: TRANSFORMER_FF
 dropout_steps: [0]
-dropout: [0.2]
-attention_dropout: [0.2]
+dropout: DROPOUT
+attention_dropout: ATTENTION_DROPOUT
 
 #TODO: Model - Alignement
 lambda_align: 0 # Default: 0.0. Lambda value for alignement loss of Garg et al (2019)For more detailed information, see: https://arxiv.org/abs/1909.02074
