@@ -484,7 +484,7 @@ possible_config_values = {
     "WORD_VEC_SIZE": [-1], # "left empty with a -1"  to match HIDDEN_SIZE
     "TRANSFORMER_FF": [128, 256],
     "DROPOUT": ["[0.2]"],
-    "ATTENTION_DROPOUT": ["[0.0, 0.2]"],
+    "ATTENTION_DROPOUT": ["[0.0]", "[0.2]"],
 }
 FREEZE_CONFIGS = {
     # "TRAIN_STEPS": possible_config_values[ "TRAIN_STEPS" ][ 0 ],
