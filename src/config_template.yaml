@@ -46,7 +46,7 @@ data:
 world_size: 1
 gpu_ranks: [0]
 
-save_data: run ## Where the samples will be written
+save_data: vocabs ## Where the samples will be written
 overwrite: false
 skip_empty_level: warning
 
