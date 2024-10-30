@@ -17,3 +17,5 @@ src/data-bt.tar
 src/data.tar.xz
 
 **.ipynb_checkpoints**
+**output_**
+**configs**
