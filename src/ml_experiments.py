@@ -504,6 +504,9 @@ if SHOW_FIGURES:
 else:
     print( test_config.get_df_config_samples().reset_index() )
 
+## Save config combinations to file.
+with open("current_config_table.log", "w") as ff:
+    ff.write( test_config.get_df_config_samples().reset_index() )
 
 # Here the main program will start to run and report all possible configs, the results can be seen in the final dataframe.
 
