@@ -8,6 +8,10 @@
 # TRAIN_STEPS
 
 # LEARNING_RATE
+# WARMUP_STEPS
+# START_DECAY_STEPS
+# LEARNING_RATE_DECAY
+# DECAY_METHOD
 
 # ENC_LAYERS
 # DEC_LAYERS
@@ -18,7 +22,6 @@
 # DROPOUT
 # ATTENTION_DROPOUT
 
-# DECAY_METHOD
 
 
 ## Outputs
@@ -103,9 +106,13 @@ accum_count: [1] # Default: 1. Accumulate gradient this many times. Approximatel
 
 
 # Optimization
+# around 20 epoch before BLEU curve flattens according to the best BLEU plot so far
 optim: "adam"
 learning_rate: LEARNING_RATE
-warmup_steps: 128 # 1 epoch warm up should be enough
+warmup_steps: WARMUP_STEPS
+start_decay_steps: START_DECAY_STEPS
+decay_steps: 128 # Decay every epoch
+learning_rate_decay: LEARNING_RATE_DECAY # empirically set
 decay_method: DECAY_METHOD
 adam_beta1: 0.9
 adam_beta2: 0.98

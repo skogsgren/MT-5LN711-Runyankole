@@ -12,7 +12,7 @@
 
 # # Setup
 
-# In[ ]:
+# In[42]:
 
 
 ROOT_DATA_DIR = "data/"
@@ -21,7 +21,7 @@ ROOT_TRAINING_DIR = "test_model/"
 SHOW_FIGURES = False
 
 
-# In[ ]:
+# In[43]:
 
 
 import os.path
@@ -48,7 +48,7 @@ import matplotlib.pyplot as plt
 
 # # Experiment Config
 
-# In[ ]:
+# In[44]:
 
 
 class ExperimentConfig( collections.abc.Iterator ):
@@ -157,7 +157,7 @@ class ExperimentConfig( collections.abc.Iterator ):
 
 # # Lab
 
-# In[ ]:
+# In[45]:
 
 
 class Lab():
@@ -210,7 +210,7 @@ class Lab():
 
 # # Experiment
 
-# In[ ]:
+# In[46]:
 
 
 class Experiment():
@@ -297,7 +297,7 @@ class Experiment():
 
 # # Main Pipeline
 
-# In[ ]:
+# In[47]:
 
 
 def custom_collate( input_samples ):
@@ -310,7 +310,7 @@ def custom_collate( input_samples ):
     return batch_data
 
 
-# In[ ]:
+# In[48]:
 
 
 class Pipeline():
@@ -348,6 +348,8 @@ class Pipeline():
         for key, val in self.config.current_config.items():
             if( key == "WORD_VEC_SIZE" ):
                 current_config_str = self._subs_config_keyword( current_config_str, "WORD_VEC_SIZE", self.config.current_config[ "HIDDEN_SIZE" ] )
+            elif( key == "DEC_LAYERS" ):
+                current_config_str = self._subs_config_keyword( current_config_str, "DEC_LAYERS", self.config.current_config[ "ENC_LAYERS" ] )
             else:
                 # print( f"\t\tSubstituting config variable string {key} with {str( val )}" ) #DEBUG
                 current_config_str = self._subs_config_keyword( current_config_str, key, val )
@@ -448,7 +450,7 @@ class Pipeline():
 
 # # Production Run
 
-# In[ ]:
+# In[53]:
 
 
 HIDDEN_SIZES = [128, 256, 512]
@@ -465,31 +467,34 @@ possible_config_values = {
     ],
     "TRAIN_STEPS": [200*100],
     "METRIC": ["BLEU"],
-    "LEARNING_RATE": [0.002, 0.02, 0.04],
+    "LEARNING_RATE": [0.002, 0.004],
+    "LEARNING_RATE_DECAY": [0.95],
+    "START_DECAY_STEPS": [2304],
+    "WARMUP_STEPS": [1],
     "DECAY_METHOD": [
-        "none", 
-        # "noamwd", 
+        "none",
+        # "noamwd",
         # "rsqrt", 
-        "noam"
+        # "noam"
     ],
     "ENC_LAYERS":[2, 4],
-    "DEC_LAYERS":[2, 4],
-    "HEADS":[4, 16],
-    "HIDDEN_SIZE": [128, 256, 512],
+    "DEC_LAYERS":[-1], # "left empty with a -1"  to match ENC_LAYERS
+    "HEADS": [2, 4],
+    "HIDDEN_SIZE": [64, 128],
     "WORD_VEC_SIZE": [-1], # "left empty with a -1"  to match HIDDEN_SIZE
-    "TRANSFORMER_FF": [128, 2048],
+    "TRANSFORMER_FF": [128, 256],
     "DROPOUT": ["[0.2]"],
-    "ATTENTION_DROPOUT": ["[0.2]"],
+    "ATTENTION_DROPOUT": ["[0.0, 0.2]"],
 }
 FREEZE_CONFIGS = {
-    "TRAIN_STEPS": possible_config_values[ "TRAIN_STEPS" ][ 0 ],
+    # "TRAIN_STEPS": possible_config_values[ "TRAIN_STEPS" ][ 0 ],
     # "LEARNING_RATE": possible_config_values[ "LEARNING_RATE" ][ 0 ],
     # "DECAY_METHOD": possible_config_values[ "DECAY_METHOD" ][ 0 ],
-    "ENC_LAYERS": possible_config_values[ "ENC_LAYERS" ][ 0 ],
-    "DEC_LAYERS": possible_config_values[ "DEC_LAYERS" ][ 0 ],
-    "HEADS": possible_config_values[ "HEADS" ][ 0 ],
-    "HIDDEN_SIZE": possible_config_values[ "HIDDEN_SIZE" ][ 0 ],
-    "TRANSFORMER_FF": possible_config_values[ "TRANSFORMER_FF" ][ 0 ],
+    # "ENC_LAYERS": possible_config_values[ "ENC_LAYERS" ][ 0 ],
+    # "DEC_LAYERS": possible_config_values[ "DEC_LAYERS" ][ 0 ],
+    # "HEADS": possible_config_values[ "HEADS" ][ 0 ],
+    # "HIDDEN_SIZE": possible_config_values[ "HIDDEN_SIZE" ][ 0 ],
+    # "TRANSFORMER_FF": possible_config_values[ "TRANSFORMER_FF" ][ 0 ],
 }
 MUST_INCLUDE_COMBINATIONS = {}
 
@@ -504,13 +509,13 @@ if SHOW_FIGURES:
 else:
     print( test_config.get_df_config_samples().reset_index() )
 
-## Save config combinations to file.
 with open("current_config_table.log", "w") as ff:
-    ff.write( test_config.get_df_config_samples().reset_index() )
+    ff.write( str( test_config.get_df_config_samples().reset_index() ) )
+
 
 # Here the main program will start to run and report all possible configs, the results can be seen in the final dataframe.
 
-# In[ ]:
+# In[51]:
 
 
 if __name__ == "__main__": # Multithreading Guard
@@ -525,6 +530,9 @@ if __name__ == "__main__": # Multithreading Guard
         display( mt_lab.get_df_reports() )
     else:
         print( mt_lab.get_df_reports().reset_index()  )
+
+with open("final_search_scores.log", "w") as ff:
+    ff.write( str( mt_lab.get_df_reports().reset_index() ) )
 
 
 # In[ ]:

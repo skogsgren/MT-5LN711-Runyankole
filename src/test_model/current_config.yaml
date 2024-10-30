@@ -1,6 +1,6 @@
 # YAML Template for Training Config
 # Programatically substituded variables MUST MATCH (CASE SENSITIVE) THE VARIABLE NAME IN Pipeline._generate_config_file()!
-# output_0
+# output_1
 # original
 # original
 # BLEU
@@ -8,24 +8,27 @@
 # 20000
 
 # 0.002
+# 1
+# 2304
+# 0.9
+# none
 
 # 2
 # 2
-# 4
+# 2
 # 128
 # 128
-# 128
+# 256
 # [0.2]
-# [0.2]
+# [0.]
 
-# noam
 
 
 ## Outputs
 # Where to save the log file and the output models/checkpoints
-log_file: output_0/train.log
-save_model: output_0/models/model_nyn_eng
-dump_preds: output_0/preds/ # needed for scoring_debug
+log_file: output_1/train.log
+save_model: output_1/models/model_nyn_eng
+dump_preds: output_1/preds/ # needed for scoring_debug
 
 
 # Training files
@@ -103,10 +106,14 @@ accum_count: [1] # Default: 1. Accumulate gradient this many times. Approximatel
 
 
 # Optimization
+# around 20 epoch before BLEU curve flattens according to the best BLEU plot so far
 optim: "adam"
 learning_rate: 0.002
-warmup_steps: 128 # 1 epoch warm up should be enough
-decay_method: noam
+warmup_steps: 1
+start_decay_steps: 2304
+decay_steps: 128 # Decay every epoch
+learning_rate_decay: 0.9 # empirically set
+decay_method: none
 adam_beta1: 0.9
 adam_beta2: 0.98
 max_grad_norm: 5
@@ -122,13 +129,13 @@ decoder_type: transformer
 position_encoding: true
 enc_layers: 2
 dec_layers: 2
-heads: 4
+heads: 2
 hidden_size: 128
 word_vec_size: 128
-transformer_ff: 128
+transformer_ff: 256
 dropout_steps: [0]
 dropout: [0.2]
-attention_dropout: [0.2]
+attention_dropout: [0.]
 
 
 #TODO: Model - Alignement
