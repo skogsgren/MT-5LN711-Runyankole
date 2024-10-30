@@ -12,14 +12,16 @@
 
 # # Setup
 
-# In[88]:
+# In[ ]:
 
 
 ROOT_DATA_DIR = "data/"
 CONFIG_FILE_TEMPLATE_PATH = "config_template.yaml"
+ROOT_TRAINING_DIR = "test_model/"
+SHOW_FIGURES = False
 
 
-# In[89]:
+# In[ ]:
 
 
 import os.path
@@ -36,6 +38,7 @@ import itertools
 import gc
 
 import pandas as pd
+from tabulate import tabulate
 import numpy as np
 
 # For user feedback
@@ -45,7 +48,7 @@ import matplotlib.pyplot as plt
 
 # # Experiment Config
 
-# In[90]:
+# In[ ]:
 
 
 class ExperimentConfig( collections.abc.Iterator ):
@@ -154,7 +157,7 @@ class ExperimentConfig( collections.abc.Iterator ):
 
 # # Lab
 
-# In[91]:
+# In[ ]:
 
 
 class Lab():
@@ -175,11 +178,11 @@ class Lab():
         
     def _run_experiment( self ):
         self.current_experiment = Experiment( self )
-        test_acc = self.current_experiment.report()
+        current_max_valid_bleu = self.current_experiment.report()
         # gc.collect()
         # torch.cuda.empty_cache()
-        self._add_report( self.experiment_config.current_config, test_acc )
-        return( test_acc )
+        self._add_report( self.experiment_config.current_config, current_max_valid_bleu )
+        return( current_max_valid_bleu )
     
     def report_all( self ):
         for config in self.experiment_config:
@@ -187,8 +190,8 @@ class Lab():
             setting_names = list( self.experiment_config.all_possible_config_values.keys() )
             for ii, setting in enumerate( config ):
                 print( f"\t{setting_names[ ii ]}: " + str( config[ setting ] ) )
-            test_acc = self._run_experiment()
-            print( "Test acc:", test_acc )
+            current_max_valid_bleu = self._run_experiment()
+            print( "Max validation BLEU:", current_max_valid_bleu )
         return( self.reports )
 
     def get_df_reports( self ):
@@ -200,14 +203,14 @@ class Lab():
                     for report in self.reports
             ]
         )
-        df_result.columns = list( self.experiment_config.all_possible_config_values.keys() ) + ["test_acc"]
+        df_result.columns = list( self.experiment_config.all_possible_config_values.keys() ) + ["max_bleu"]
         df_result = df_result.set_index( list( df_result.columns[ :-1 ] ) ).sort_index()
         return( df_result )
 
 
 # # Experiment
 
-# In[92]:
+# In[ ]:
 
 
 class Experiment():
@@ -223,34 +226,69 @@ class Experiment():
         return( self.current_pipeline.evaluator() )
 
     def plot_curves( self ):
-        current_model = self.current_pipeline.model
-        fig = plt.figure(figsize=(6, 4))
-        ax = plt.subplot()
-        ax.set_title("Plot of the (hopefully) decreasing loss over epochs")
-        ax.plot(current_model.training_loss_, 'b-')
-        ax.set_ylabel("Training Loss", color='b')
-        ax.set_xlabel("Epoch")
-        # ax.set_yscale('log')
-        ax.tick_params(axis='y', labelcolor='b')
-        ax = ax.twinx()
-        ax.plot(current_model.training_accuracy_, 'r-')
-        ax.set_ylabel("Accuracy [%]", color='r')
-        ax.tick_params(axis='y', labelcolor='r')
-        a = list(ax.axis())
-        a[2] = 0
-        a[3] = 100
-        ax.axis(a)
-        t = np.arange(0, len( current_model.training_accuracy_ ), len( self.current_pipeline.dataset_train )//self.current_pipeline.batch_size+1)
-        ax.set_xticks(ticks=t)
-        ax.set_xticklabels(labels=np.arange(len(t)))
-        fig.tight_layout()
-        plt.show()
+        current_bleu_scores = self.current_pipeline.bleu_scores
+        current_ppl_scores = self.current_pipeline.ppl_scores
+        current_acc_scores = self.current_pipeline.acc_scores
         
+        current_train_ppl_scores = self.current_pipeline.train_ppl_scores
+        current_train_acc_scores = self.current_pipeline.train_acc_scores
+        
+        ## Plot BLEU
+        fig = plt.figure(figsize=(10, 5))
+        ax = plt.subplot()
+        ax.plot( current_bleu_scores )
+        ax.set_title( "BLEU Score Plot" )
+        ax.set_xlabel( 'Epoch (1 epoch per "valid_steps=train_steps" )' )
+        ax.set_ylabel( "Validation BLEU" )
+        if SHOW_FIGURES: plt.show()
+        fig.savefig( self.current_pipeline.current_output_path + "bleu_plot.png" )
+        
+        ## Plot Perplexity
+        fig = plt.figure(figsize=(10, 5))
+        ax = plt.subplot()
+        ax.plot( current_ppl_scores )
+        ax.set_title( "Perplexity Score Plot" )
+        ax.set_xlabel( 'Epoch (1 epoch per "valid_steps=train_steps" )' )
+        ax.set_ylabel( "Validation Perplexity" )
+        if SHOW_FIGURES: plt.show()
+        fig.savefig( self.current_pipeline.current_output_path + "ppl_plot.png" )
+        
+        
+        ## Plot Accuracy
+        fig = plt.figure(figsize=(10, 5))
+        ax = plt.subplot()
+        ax.plot( current_acc_scores )
+        ax.set_title( "Accuracy Score Plot" )
+        ax.set_xlabel( 'Epoch (1 epoch per "valid_steps=train_steps" )' )
+        ax.set_ylabel( "Validation Accuracy" )
+        if SHOW_FIGURES: plt.show()
+        fig.savefig( self.current_pipeline.current_output_path + "acc_plot.png" )
+        
+        ## Plot Training Perplexity
+        fig = plt.figure(figsize=(10, 5))
+        ax = plt.subplot()
+        ax.plot( current_train_ppl_scores )
+        ax.set_title( "Training Perplexity Score Plot" )
+        ax.set_xlabel( 'Epoch (1 epoch per "valid_steps=train_steps" )' )
+        ax.set_ylabel( "Training Perplexity" )
+        if SHOW_FIGURES: plt.show()
+        fig.savefig( self.current_pipeline.current_output_path + "train_ppl_plot.png" )
+
+        ## Plot Training Accuracy
+        fig = plt.figure(figsize=(10, 5))
+        ax = plt.subplot()
+        ax.plot( current_train_acc_scores )
+        ax.set_title( "Training Accuracy Score Plot" )
+        ax.set_xlabel( 'Epoch (1 epoch per "valid_steps=train_steps" )' )
+        ax.set_ylabel( "Training Accuracy" )
+        if SHOW_FIGURES: plt.show()
+        fig.savefig( self.current_pipeline.current_output_path + "train_acc_plot.png" )
+
+    
     def report( self ):
-        test_acc = self._run_pipeline()
-        # if( self.lab.experiment_config.current_config[ "model_name" ] != "baseline" ): #LEGACY
-        #     self.plot_curves()
-        return( test_acc )
+        current_max_valid_bleu = self._run_pipeline()
+        self.plot_curves()
+        return( current_max_valid_bleu )
 
 
 # # Models
@@ -259,7 +297,7 @@ class Experiment():
 
 # # Main Pipeline
 
-# In[93]:
+# In[ ]:
 
 
 def custom_collate( input_samples ):
@@ -272,7 +310,7 @@ def custom_collate( input_samples ):
     return batch_data
 
 
-# In[94]:
+# In[ ]:
 
 
 class Pipeline():
@@ -285,25 +323,40 @@ class Pipeline():
         self.test_iterator = None
         self.batch_size = 512
         self.tokenizer = None
+
+        self.current_output_dir = f"output_{self.config.config_id}" # Needed for the output paths in configs
+        self.current_output_path = f"{ROOT_TRAINING_DIR}/{self.current_output_dir}/" # used for training output and read back training log for eval
+        self.bleu_scores = []
+        self.ppl_scores = []
+        self.acc_scores = []
         
-        # self._prepare_tokenizer()
-        self.model = None
-        # self._prepare_model()
-        # self._preprocessor()
+        self.train_ppl_scores = []
+        self.train_acc_scores = []
+        
         self._generate_config_file()
+        
     def _load_config_file_template( self ):
         with open( CONFIG_FILE_TEMPLATE_PATH, 'r' ) as ff:
             return( ff.read() )
+    def _subs_config_keyword( self, config_str, key, val ):
+        return( re.sub( f"\\b{str( key )}\\b", str( val ), config_str ) )
         
     def _generate_config_file( self ):
         tempalte_config_str = self._load_config_file_template()
+        os.makedirs( self.current_output_path, exist_ok = True )
+        current_config_str = self._subs_config_keyword( tempalte_config_str, "OUTPUT_PATH_PER_RUN", self.current_output_dir )
         for key, val in self.config.current_config.items():
-            # print( f"\t\tSubstituting config variable string {key} with {str( val )}" ) #DEBUG
-            tempalte_config_str = re.sub( f"\\b{key}\\b", str( val ), tempalte_config_str )
+            if( key == "WORD_VEC_SIZE" ):
+                current_config_str = self._subs_config_keyword( current_config_str, "WORD_VEC_SIZE", self.config.current_config[ "HIDDEN_SIZE" ] )
+            else:
+                # print( f"\t\tSubstituting config variable string {key} with {str( val )}" ) #DEBUG
+                current_config_str = self._subs_config_keyword( current_config_str, key, val )
+        with open( f"{ROOT_TRAINING_DIR}/current_config.yaml", 'w' ) as ff:
+            ff.write( current_config_str )
+        os.makedirs( f"{ROOT_TRAINING_DIR}/configs/", exist_ok = True )
+        with open( f"{ROOT_TRAINING_DIR}/configs/config_{self.config.config_id}.yaml", 'w' ) as ff: # store all the config files
+            ff.write( current_config_str )
             
-        with open( 'test_model/current_config.yaml', 'w' ) as ff:
-            ff.write( tempalte_config_str )
-
     def _prepare_tokenizer( self ): #LEGACY: may not need
         print( "_prepare_tokenizer( self )" )
         # if( self.config.current_config[ "model_name" ] != "baseline" ):
@@ -328,7 +381,7 @@ class Pipeline():
         #     print( "Baseline model, training will be skipped." )
         #     return 0
         print( "Training..." )
-        with open("ml_experiments.log", "w") as output_file:
+        with open("ml_experiments.log", "a") as output_file:
             subprocess.run( 
                 ["bash", "train_test_model.sh"],
                 cwd = os.path.join( os.getcwd(), "test_model" ),
@@ -341,81 +394,123 @@ class Pipeline():
         # loss_function = nn.BCELoss() # A loss function that fits our choice of output layer and data. The
         # ...
         # return( max( self.model.training_accuracy_ ) )
-        
+
     def _evaluator( self ):
-        print( "_evaluator( self )" )
+        """ OUTPUT: self.bleu_scores/ppl_scores/acc_scores
+        """
+        with open( f"{self.current_output_path}/train.log", 'r' ) as ff:
+            training_log = ff.readlines()
         
+        for line in training_log:
+            ## Extract BLEUs
+            match_bleu = re.search(r"validation BLEU:\s*(nan|[0-9.]+)", line)
+            if match_bleu:
+                self.bleu_scores.append( float( match_bleu.group( 1 ) ) )
+            ## Extract Perplexity
+            match_ppl = re.search(r"Validation perplexity:\s*(nan|[0-9.]+)", line)
+            if match_ppl:
+                self.ppl_scores.append( float( match_ppl.group( 1 ) ) )
+            ## Extract Accuracy
+            match_acc = re.search(r"Validation accuracy:\s*(nan|[0-9.]+)", line)
+            if match_acc:
+                self.acc_scores.append( float( match_acc.group( 1 ) ) )
+                
+            ## Extract TRAINING Perplexity
+            match_ppl_train = re.search(r"Train perplexity:\s*(nan|[0-9.]+)", line)
+            if match_ppl_train:
+                self.train_ppl_scores.append( float( match_ppl_train.group( 1 ) ) )
+            
+            ## Extract TRAINING Accuracy
+            match_acc_train = re.search(r"Train accuracy:\s*(nan|[0-9.]+)", line)
+            if match_acc_train:
+                self.train_acc_scores.append( float( match_acc_train.group( 1 ) ) )
+        ## log scores to files
+        with open( f"{self.current_output_path}/bleu.log", 'w' ) as ff:
+            ff.write( "\r\n".join( [str( score ) for score in self.bleu_scores] ) )
+        with open( f"{self.current_output_path}/ppl.log", 'w' ) as ff:
+            ff.write( "\r\n".join( [str( score ) for score in self.ppl_scores] ) )
+        with open( f"{self.current_output_path}/acc.log", 'w' ) as ff:
+            ff.write( "\r\n".join( [str( score ) for score in self.acc_scores] ) )
+        with open( f"{self.current_output_path}/train_ppl.log", 'w' ) as ff:
+            ff.write( "\r\n".join( [str( score ) for score in self.train_ppl_scores] ) )
+        with open( f"{self.current_output_path}/train_acc.log", 'w' ) as ff:
+            ff.write( "\r\n".join( [str( score ) for score in self.train_acc_scores] ) )
+
     def evaluator( self ):
         """ Evaluate and report/store scores
         """
         print( "Evaluator..." )
-        self._preprocessor()
-        max_training_acc = 0
-        max_training_acc = self._trainer()
-        # max_test_acc = self._evaluator()
-        return( max_training_acc )
+        self._trainer()
+        self._evaluator()
+        max_valid_bleu = max( self.bleu_scores )
+        return( max_valid_bleu )
 
 
 # # Production Run
 
-# In[95]:
-from tabulate import tabulate
-
-if __name__ == "__main__": # multithreading guard
-    possible_config_values = {
-        "DATASET_NAME_TRAIN": [
-            "original", 
-            # "bible", 
-            # "all"
-        ],
-        "DATASET_NAME_VALID": [
-            "original",
-            # "bible", 
-            # "all"
-        ],
-        "TRAIN_STEPS": [200*1000],
-        "METRIC": ["BLEU"],
-        "LEARNING_RATE": [0.001, 0.01, 0.05],
-        "DECAY_METHOD": ["none", "noamwd", "rsqrt", "noam"],
-        "ENC_LAYERS":[2, 4],
-        "DEC_LAYERS":[2, 4],
-        "HEADS":[4, 16],
-        "HIDDEN_SIZE": [64],
-        "WORD_VEC_SIZE": [64, 512], # should match HIDDEN_SIZE
-        "TRANSFORMER_FF": [128, 2048],
-        "DROPOUT": ["[0.2]"],
-        "ATTENTION_DROPOUT": ["[0.2]"],
-        
-    }
-    FREEZE_CONFIGS = {
-        # "LEARNING_RATE": possible_config_values[ "LEARNING_RATE" ][ 0 ],
-        # "DECAY_METHOD": possible_config_values[ "DECAY_METHOD" ][ 0 ],
-        "ENC_LAYERS": possible_config_values[ "ENC_LAYERS" ][ 0 ],
-        "DEC_LAYERS": possible_config_values[ "DEC_LAYERS" ][ 0 ],
-        "HEADS": possible_config_values[ "HEADS" ][ 0 ],
-        "HIDDEN_SIZE": possible_config_values[ "HIDDEN_SIZE" ][ 0 ],
-        "WORD_VEC_SIZE": possible_config_values[ "WORD_VEC_SIZE" ][ 0 ],
-        "TRANSFORMER_FF": possible_config_values[ "TRANSFORMER_FF" ][ 0 ],
-    }
-    MUST_INCLUDE_COMBINATIONS = {}
-
-    test_config = ExperimentConfig( 
-        possible_config_values,
-        perc = 1.0,
-        freeze_configs = FREEZE_CONFIGS, 
-        must_include_combinations = MUST_INCLUDE_COMBINATIONS
-    )
-
-    print( tabulate( test_config.get_df_config_samples().reset_index(), headers='keys', tablefmt='psql' ) )
-
-    raise
+# In[ ]:
 
 
-    # Here the main program will start to run and report all possible configs, the results can be seen in the final dataframe.
+HIDDEN_SIZES = [128, 256, 512]
+possible_config_values = {
+    "DATASET_NAME_TRAIN": [
+        "original", 
+        # "bible", 
+        # "all"
+    ],
+    "DATASET_NAME_VALID": [
+        "original",
+        # "bible", 
+        # "all"
+    ],
+    "TRAIN_STEPS": [200*100],
+    "METRIC": ["BLEU"],
+    "LEARNING_RATE": [0.002, 0.02, 0.04],
+    "DECAY_METHOD": [
+        "none", 
+        # "noamwd", 
+        # "rsqrt", 
+        "noam"
+    ],
+    "ENC_LAYERS":[2, 4],
+    "DEC_LAYERS":[2, 4],
+    "HEADS":[4, 16],
+    "HIDDEN_SIZE": [128, 256, 512],
+    "WORD_VEC_SIZE": [-1], # "left empty with a -1"  to match HIDDEN_SIZE
+    "TRANSFORMER_FF": [128, 2048],
+    "DROPOUT": ["[0.2]"],
+    "ATTENTION_DROPOUT": ["[0.2]"],
+}
+FREEZE_CONFIGS = {
+    "TRAIN_STEPS": possible_config_values[ "TRAIN_STEPS" ][ 0 ],
+    # "LEARNING_RATE": possible_config_values[ "LEARNING_RATE" ][ 0 ],
+    # "DECAY_METHOD": possible_config_values[ "DECAY_METHOD" ][ 0 ],
+    "ENC_LAYERS": possible_config_values[ "ENC_LAYERS" ][ 0 ],
+    "DEC_LAYERS": possible_config_values[ "DEC_LAYERS" ][ 0 ],
+    "HEADS": possible_config_values[ "HEADS" ][ 0 ],
+    "HIDDEN_SIZE": possible_config_values[ "HIDDEN_SIZE" ][ 0 ],
+    "TRANSFORMER_FF": possible_config_values[ "TRANSFORMER_FF" ][ 0 ],
+}
+MUST_INCLUDE_COMBINATIONS = {}
 
-    # In[96]:
+test_config = ExperimentConfig( 
+    possible_config_values,
+    perc = 1.0,
+    freeze_configs = FREEZE_CONFIGS, 
+    must_include_combinations = MUST_INCLUDE_COMBINATIONS
+)
+if SHOW_FIGURES:
+    display( test_config.get_df_config_samples() )
+else:
+    print( test_config.get_df_config_samples().reset_index() )
 
 
+# Here the main program will start to run and report all possible configs, the results can be seen in the final dataframe.
+
+# In[ ]:
+
+
+if __name__ == "__main__": # Multithreading Guard
     mt_lab = Lab( 
         possible_config_values,
         perc = 1.0,
@@ -423,16 +518,13 @@ if __name__ == "__main__": # multithreading guard
         must_include_combinations = MUST_INCLUDE_COMBINATIONS
     )
     lab_result = mt_lab.report_all()
-    mt_lab.get_df_reports()
+    if SHOW_FIGURES:
+        display( mt_lab.get_df_reports() )
+    else:
+        print( mt_lab.get_df_reports().reset_index()  )
 
 
-    # In[ ]:
-
-
-
-
-
-    # In[ ]:
+# In[ ]:
 
 
 
