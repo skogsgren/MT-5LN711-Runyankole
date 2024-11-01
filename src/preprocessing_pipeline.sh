@@ -87,6 +87,36 @@ cat "$TMP_DIR"/eng_training.txt \
 cp "$TMP_DIR"/eng_dev.txt data/bible/eng_dev.detok
 cp "$TMP_DIR"/eng_test.txt data/bible/eng_test.detok
 
+echo "learning bpe from (original, backtranslated)"
+echo "exporting weights to ./data/backtranslated/\$LANG.bpe"
+./bpe.sh \
+    -l nyn \
+    -o data/backtranslated/ \
+    -d "$TMP_DIR"/nyn_dev.txt \
+    -t "$TMP_DIR"/nyn_test.txt \
+    "$TMP_DIR"/nyn_training.txt \
+    "$TMP_DIR"/data/nyn_backtranslated_training.txt
+./bpe.sh \
+    -l eng \
+    -o data/backtranslated/ \
+    -d "$TMP_DIR"/eng_dev.txt \
+    -t "$TMP_DIR"/eng_test.txt \
+    "$TMP_DIR"/eng_training.txt \
+    "$TMP_DIR"/data/eng_backtranslated_training.txt
+
+echo "copying detokenized originals to ./data/\$LANG.detok"
+cat "$TMP_DIR"/nyn_training.txt \
+    "$TMP_DIR"/data/nyn_backtranslated_training.txt \
+    > data/backtranslated/nyn_train.detok
+cp "$TMP_DIR"/nyn_dev.txt data/backtranslated/nyn_dev.detok
+cp "$TMP_DIR"/nyn_test.txt data/backtranslated/nyn_test.detok
+
+cat "$TMP_DIR"/eng_training.txt \
+    "$TMP_DIR"/data/eng_backtranslated_training.txt \
+    > data/backtranslated/eng_train.detok
+cp "$TMP_DIR"/eng_dev.txt data/backtranslated/eng_dev.detok
+cp "$TMP_DIR"/eng_test.txt data/backtranslated/eng_test.detok
+
 echo "learning bpe from (original, bible, backtranslated)"
 echo "exporting weights to ./data/all/\$LANG.bpe"
 ./bpe.sh \
