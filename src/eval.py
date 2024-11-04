@@ -6,11 +6,12 @@ from tqdm import tqdm
 from sacrebleu.metrics import BLEU, CHRF
 import matplotlib.pyplot as plt
 import argparse as args
+import json
 
 PATH = './experiments/run/'
 SRC_PATH = './data/original/nyn_test.bpe'
 TGT_PATH = './data/original/eng_test.bpe'
-pattern = 'preds_*'
+
 
 def find_directories():
     outputs = glob.glob(f'./test_model/output_*/models/')
@@ -25,7 +26,7 @@ def find_models(output):
     return actual_models
 
 def run_model(model, output, model_name):
-    result = subprocess.run(
+    subprocess.run(
         ["onmt_translate",
          "--model", model,
          "--src", SRC_PATH,
@@ -80,6 +81,11 @@ def calculate_metrics(preds):
     output_bleu = {}
     target_file = open_file(TGT_PATH)
 
+
+
+
+
+
     for pred in preds:
         source_file = open_file(pred)
         name_output = output_name(pred)
@@ -111,10 +117,10 @@ if __name__ == '__main__':
     bleu = BLEU()
     chrf = CHRF()
 #   if not os.path.exists('./results/preds_model_nyn_eng_step_128.txt'): #Uncomment if you wish to skip the translation part
-    for output in tqdm(range(len(outputs))):
+    for output in tqdm(range(len(outputs)), desc="Running different hyperparameters."):
         directory = check_directory(outputs[output])
         models = find_models(outputs[output])
-        for model in tqdm(range(len(models))):
+        for model in tqdm(range(len(models)), desc=f"Testing models"):
             model_name = models[model][:-3]
             model = outputs[output] + models[model]
             result = run_model(model, directory, model_name)
@@ -123,33 +129,45 @@ if __name__ == '__main__':
     bleu_scores, chrf_scores = calculate_metrics(preds)
 
     if not os.path.exists('./results/score_images'):
-        os.makedirs("./results/score_images")    
+        os.makedirs("./results/score_images")
 
-    for output in bleu_scores:
+    
+    scores_bleu_dict = {}
+    for output in tqdm(bleu_scores, desc="Plotting BLEU scores"):
+        if not os.path.exists('./results/tables'):
+            os.makedirs('./results/tables', exist_ok=True)
         x = list(range(1, len(bleu_scores[output])+1))
         plot_line(bleu_scores[output], x, output)
+        scores_bleu_dict[output] = bleu_scores[output]
+    
+    print('Dumping BLEU scores as JSON')
+    with open('./results/tables/scores_bleu.json', 'w') as bleu_file:
+        json.dump(scores_bleu_dict, bleu_file)
+    bleu_file.close()
 
     plt.legend()
     plt.xlabel("Epoch")
     plt.ylabel("BLEU")
     plt.title("BLEU SCORES")
     plt.savefig("./results/score_images/BLEU_scores.png")
+    plt.close()
 
-    for output in chrf_scores:
+    
+    scores_chrf_dict = {}
+    for output in tqdm(chrf_scores, desc="Plotting CHRF scores"):
         x = list(range(1, len(chrf_scores[output])+1))
         plot_line(chrf_scores[output], x, output)
+        scores_chrf_dict[output] = chrf_scores[output]
+    
+    print("Dumping CHRF scores as JSON")
+    with open('./results/tables/scores_chrf.json', 'w') as chrf_file:
+        json.dump(scores_chrf_dict, chrf_file)
+    chrf_file.close()
 
     plt.legend()
     plt.xlabel("Epoch")
     plt.ylabel("CHRF")
     plt.title("CHRF Scores")
-
-    if not os.path.exists('./results/score_images'):
-        os.makedirs("./results/score_images")
-
     plt.savefig("./results/score_images/CHRF_scores.png")
+    plt.close()
     
-    #TODO make each bleu score correlate to each output_* directory, so that it can be plotted
-    #TODO make a CHRF scorer, and make it do the same
-    #TODO plot it and save the plots. 
-    #TODO Divide everything into nice functions
