@@ -346,7 +346,9 @@ class Pipeline():
         os.makedirs( self.current_output_path, exist_ok = True )
         current_config_str = self._subs_config_keyword( tempalte_config_str, "OUTPUT_PATH_PER_RUN", self.current_output_dir )
         for key, val in self.config.current_config.items():
-            if( key == "WORD_VEC_SIZE" ):
+            if( key == "DATASET_NAME_VALID" ):
+                current_config_str = self._subs_config_keyword( current_config_str, "DATASET_NAME_VALID", self.config.current_config[ "DATASET_NAME_TRAIN" ] )
+            elif( key == "WORD_VEC_SIZE" ):
                 current_config_str = self._subs_config_keyword( current_config_str, "WORD_VEC_SIZE", self.config.current_config[ "HIDDEN_SIZE" ] )
             elif( key == "DEC_LAYERS" ):
                 current_config_str = self._subs_config_keyword( current_config_str, "DEC_LAYERS", self.config.current_config[ "ENC_LAYERS" ] )
@@ -460,11 +462,7 @@ possible_config_values = {
         # "bible", 
         # "all"
     ],
-    "DATASET_NAME_VALID": [
-        "original",
-        # "bible", 
-        # "all"
-    ],
+    "DATASET_NAME_VALID": [-1], # "left empty with a -1" to match DATASET_NAME_TRAIN
     "TRAIN_STEPS": [200*100],
     "METRIC": ["BLEU"],
     "LEARNING_RATE": [0.002, 0.004],
