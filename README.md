@@ -30,45 +30,69 @@ You will end up with a folder inside `src` called `data` with the following
 structure:
 
 ```
-data
+.
 ├── all
 │   ├── eng.bpe
 │   ├── eng_dev.bpe
+│   ├── eng_dev.detok
 │   ├── eng_test.bpe
+│   ├── eng_test.detok
 │   ├── eng_train.bpe
+│   ├── eng_train.detok
 │   ├── nyn.bpe
 │   ├── nyn_dev.bpe
+│   ├── nyn_dev.detok
 │   ├── nyn_test.bpe
-│   └── nyn_train.bpe
+│   ├── nyn_test.detok
+│   ├── nyn_train.bpe
+│   └── nyn_train.detok
+├── backtranslated
+│   ├── eng.bpe
+│   ├── eng_dev.bpe
+│   ├── eng_dev.detok
+│   ├── eng_test.bpe
+│   ├── eng_test.detok
+│   ├── eng_train.bpe
+│   ├── eng_train.detok
+│   ├── nyn.bpe
+│   ├── nyn_dev.bpe
+│   ├── nyn_dev.detok
+│   ├── nyn_test.bpe
+│   ├── nyn_test.detok
+│   ├── nyn_train.bpe
+│   └── nyn_train.detok
 ├── bible
 │   ├── eng.bpe
 │   ├── eng_dev.bpe
+│   ├── eng_dev.detok
 │   ├── eng_test.bpe
+│   ├── eng_test.detok
 │   ├── eng_train.bpe
+│   ├── eng_train.detok
 │   ├── nyn.bpe
 │   ├── nyn_dev.bpe
+│   ├── nyn_dev.detok
 │   ├── nyn_test.bpe
-│   └── nyn_train.bpe
-├── non_bpe
-│   ├── eng_backtranslated_training.txt
-│   ├── eng_dev.txt
-│   ├── eng_test.txt
-│   ├── eng_training.txt
-│   ├── eng-x-bible-kingjames_parsed.txt
-│   ├── nyn_backtranslated_training.txt
-│   ├── nyn_dev.txt
-│   ├── nyn_test.txt
-│   ├── nyn_training.txt
-│   └── nyn-x-bible_parsed.txt
+│   ├── nyn_test.detok
+│   ├── nyn_train.bpe
+│   └── nyn_train.detok
 └── original
     ├── eng.bpe
     ├── eng_dev.bpe
+    ├── eng_dev.detok
     ├── eng_test.bpe
+    ├── eng_test.detok
     ├── eng_train.bpe
+    ├── eng_train.detok
     ├── nyn.bpe
     ├── nyn_dev.bpe
+    ├── nyn_dev.detok
     ├── nyn_test.bpe
-    └── nyn_train.bpe
+    ├── nyn_test.detok
+    ├── nyn_train.bpe
+    └── nyn_train.detok
+
+5 directories, 56 files
 ```
 
 These subdirectories of `./src/data` are then finished datasets which can be used
@@ -125,6 +149,7 @@ In order to process it, there is a bash-script
   (`./src/bpe.sh`):
     - `original`: data from sunbird.
     - `bible`: data from sunbird + bible translation.
+    - `backtranslated`: data from sunbird + backtranslated data.
     - `all`: data from sunbird + bible translation + backtranslated data.
 - Copies the extracted datasets to the `./src/data/$METHOD` folder.
 
