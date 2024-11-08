@@ -79,15 +79,10 @@ def calculate_chrf(source, tgt):
 def calculate_metrics(preds):
     output_chrf = {}
     output_bleu = {}
-    target_file = open_file(TGT_PATH)
-
-
-
-
-
+    target_file = detokeniser(open(TGT_PATH, 'r', encoding='utf-8').read()).splitlines()
 
     for pred in preds:
-        source_file = open_file(pred)
+        source_file = detokeniser(open(pred, 'r', encoding='utf-8').read()).splitlines()
         name_output = output_name(pred)
 
         try:
@@ -107,8 +102,12 @@ def calculate_metrics(preds):
 
     return output_bleu, output_chrf
 
-def plot_line(output, x, name):    
+def plot_line(output, x, name):
     plt.plot(x, output, label = f'{name}')
+
+def detokeniser(file):
+    detokenised_file = re.sub(r'@@\s', '', file)
+    return detokenised_file
 
 
 if __name__ == '__main__':
@@ -127,19 +126,19 @@ if __name__ == '__main__':
 
     preds = find_predictions()
     bleu_scores, chrf_scores = calculate_metrics(preds)
-
     if not os.path.exists('./results/score_images'):
         os.makedirs("./results/score_images")
 
-    
+
     scores_bleu_dict = {}
+    if not os.path.exists('./results/tables'):
+       os.makedirs('./results/tables', exist_ok=True)
+
     for output in tqdm(bleu_scores, desc="Plotting BLEU scores"):
-        if not os.path.exists('./results/tables'):
-            os.makedirs('./results/tables', exist_ok=True)
         x = list(range(1, len(bleu_scores[output])+1))
         plot_line(bleu_scores[output], x, output)
         scores_bleu_dict[output] = bleu_scores[output]
-    
+
     print('Dumping BLEU scores as JSON')
     with open('./results/tables/scores_bleu.json', 'w') as bleu_file:
         json.dump(scores_bleu_dict, bleu_file)
@@ -152,13 +151,13 @@ if __name__ == '__main__':
     plt.savefig("./results/score_images/BLEU_scores.png")
     plt.close()
 
-    
+
     scores_chrf_dict = {}
     for output in tqdm(chrf_scores, desc="Plotting CHRF scores"):
         x = list(range(1, len(chrf_scores[output])+1))
         plot_line(chrf_scores[output], x, output)
         scores_chrf_dict[output] = chrf_scores[output]
-    
+
     print("Dumping CHRF scores as JSON")
     with open('./results/tables/scores_chrf.json', 'w') as chrf_file:
         json.dump(scores_chrf_dict, chrf_file)
@@ -170,4 +169,4 @@ if __name__ == '__main__':
     plt.title("CHRF Scores")
     plt.savefig("./results/score_images/CHRF_scores.png")
     plt.close()
-    
+
