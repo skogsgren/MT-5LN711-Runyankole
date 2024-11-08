@@ -55,7 +55,7 @@ def enhance_fluency_with_openai(translations, batch_size=5):
         prompt += "\n\n".join(f"{idx+1}. {sentence}" for idx, sentence in enumerate(batch, start=i + 1))
         
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # or "gpt-4" if available
+            model="gpt-3.5-turbo",  
             messages=[{"role": "system", "content": "You are an assistant that improves translation fluency."},
                       {"role": "user", "content": prompt}],
             max_tokens=1000,
