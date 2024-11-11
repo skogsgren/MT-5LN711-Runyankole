@@ -43,8 +43,8 @@ data:
         # transforms: [filtertoolong]
 
 # Number of GPUs, and IDs of GPUs
-#world_size: 1
-#gpu_ranks: [0]
+world_size: 1
+gpu_ranks: [0]
 
 save_data: vocabs ## Where the samples will be written
 overwrite: false
