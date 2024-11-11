@@ -325,7 +325,7 @@ class Pipeline():
         self.tokenizer = None
 
         self.current_output_dir = f"output_{self.config.config_id}" # Needed for the output paths in configs
-        self.current_output_path = f"{ROOT_TRAINING_DIR}/{self.current_output_dir}/" # used for training output and read back training log for eval
+        self.current_output_path = f"{ROOT_TRAINING_DIR}{self.current_output_dir}" # used for training output and read back training log for eval
         self.bleu_scores = []
         self.ppl_scores = []
         self.acc_scores = []
@@ -402,6 +402,7 @@ class Pipeline():
     def _evaluator( self ):
         """ OUTPUT: self.bleu_scores/ppl_scores/acc_scores
         """
+        print( os.getcwd() )
         with open( f"{self.current_output_path}/train.log", 'r' ) as ff:
             training_log = ff.readlines()
         
@@ -458,14 +459,14 @@ class Pipeline():
 HIDDEN_SIZES = [128, 256, 512]
 possible_config_values = {
     "DATASET_NAME_TRAIN": [
-        "original", 
-        # "bible", 
-        # "all"
+        "original",
+        "bible",
+        "all"
     ],
     "DATASET_NAME_VALID": [-1], # "left empty with a -1" to match DATASET_NAME_TRAIN
     "TRAIN_STEPS": [200*100],
     "METRIC": ["BLEU"],
-    "LEARNING_RATE": [0.002, 0.004],
+    "LEARNING_RATE": [0.002],
     "LEARNING_RATE_DECAY": [0.95],
     "START_DECAY_STEPS": [2304],
     "WARMUP_STEPS": [1],
@@ -475,14 +476,14 @@ possible_config_values = {
         # "rsqrt", 
         # "noam"
     ],
-    "ENC_LAYERS":[2, 4],
+    "ENC_LAYERS":[2],
     "DEC_LAYERS":[-1], # "left empty with a -1"  to match ENC_LAYERS
-    "HEADS": [2, 4],
-    "HIDDEN_SIZE": [64, 128],
+    "HEADS": [4], 
+    "HIDDEN_SIZE": [64],
     "WORD_VEC_SIZE": [-1], # "left empty with a -1"  to match HIDDEN_SIZE
-    "TRANSFORMER_FF": [128, 256],
+    "TRANSFORMER_FF": [256],
     "DROPOUT": ["[0.2]"],
-    "ATTENTION_DROPOUT": ["[0.0]", "[0.2]"],
+    "ATTENTION_DROPOUT": ["[0.2]" ],
 }
 FREEZE_CONFIGS = {
     # "TRAIN_STEPS": possible_config_values[ "TRAIN_STEPS" ][ 0 ],
