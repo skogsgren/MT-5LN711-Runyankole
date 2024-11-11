@@ -459,8 +459,8 @@ class Pipeline():
 HIDDEN_SIZES = [128, 256, 512]
 possible_config_values = {
     "DATASET_NAME_TRAIN": [
-        "original", 
-        "bible", 
+        "original",
+        "bible",
         "all"
     ],
     "DATASET_NAME_VALID": [-1], # "left empty with a -1" to match DATASET_NAME_TRAIN

@@ -20,9 +20,16 @@ def parse_bible(
     }
     parallel_text: list[tuple[str, str]] = []
     for verse_number, verse_text in source_lines:
-        if not target_dict.get(verse_number):
-            print(f"WARN: {verse_number} not in target")
+        if verse_text == "\n":
+            print(f"  WARN: {verse_number} src is empty. ignoring...")
             continue
+        if not target_dict.get(verse_number):
+            print(f"  WARN: {verse_number} not in target")
+            continue
+        if target_dict.get(verse_number) == "\n":
+            print(f"  WARN: {verse_number} tgt is empty: ignoring...")
+            continue
+
         if lowercase:
             verse_text = verse_text.lower()
             target_dict[verse_number] = target_dict[verse_number].lower()
